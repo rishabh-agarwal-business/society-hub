@@ -8,9 +8,24 @@ import { StatusBadge } from '../../common/StatusBadge';
 import { GlassButton } from '../../common/GlassButton';
 import { User } from '../../../types';
 import { usePayments } from '../../../hooks/usePayments';
+import { useState } from 'react';
+import PaymentModal from '../../modals/PaymentModal';
+import { EventPopup } from '../../EventPopup';
 
 interface OverviewTabProps {
     user: User;
+}
+
+const row = {
+    "id": "pay-003",
+    "userId": "user-003",
+    "societyId": "soc-002",
+    "amount": 10000,
+    "month": "November",
+    "year": 2025,
+    "status": "pending",
+    "paidDate": "2025-11-05",
+    "dueDate": "Nov 5, 2025"
 }
 
 /**
@@ -19,15 +34,62 @@ interface OverviewTabProps {
  */
 export function OverviewTab({ user }: OverviewTabProps) {
     const { payments, stats } = usePayments(undefined, user.id);
+    const [selectedPayment, setSelectedPayment] = useState<any>(null);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [currentEvent, setCurrentEvent] = useState<any>(null);
+    const [showEventPopup, setShowEventPopup] = useState<boolean>(false);
 
     // Mock data for events - in real app, would come from useEvents hook
     const upcomingEvents = [
-        { id: 1, title: 'Annual Diwali Celebration', date: '2025-11-25', type: 'event' as const },
-        { id: 2, title: 'Society General Meeting', date: '2025-12-01', type: 'meeting' as const },
-        { id: 3, title: 'Christmas Party', date: '2025-12-24', type: 'event' as const },
+        {
+            id: 1,
+            title: 'Annual Diwali Celebration',
+            colony: 'A Block',
+            date: 'November 25, 2025',
+            time: '6:00 PM - 10:00 PM',
+            location: 'Community Hall, A Block',
+            description: 'Join us for our annual Diwali celebration with cultural programs, dinner, and fireworks display. All residents of A Block are cordially invited.',
+            attendees: 87,
+            image: 'https://images.unsplash.com/photo-1605722243979-fe0be8158232?w=800&q=80',
+            type: 'celebration'
+        },
+        {
+            id: 2,
+            title: 'Society Meeting',
+            colony: 'Kasturi Vatika Phase 3',
+            date: 'November 25, 2025',
+            time: '6:00 PM - 10:00 PM',
+            location: 'Society Park',
+            description: 'Join us for our society meeting. All residents of kasturi vatika phase 3 are cordially invited.',
+            attendees: 30,
+            image: 'https://images.unsplash.com/photo-1605722243979-fe0be8158232?w=800&q=80',
+            type: 'meeting'
+        },
+        {
+            id: 3,
+            title: 'Society Election',
+            colony: 'Kasturi Vatika Phase 3',
+            date: 'December 25, 2025',
+            time: '12:00 AM - 12:00 PM',
+            location: 'Society Park',
+            description: 'Join us for our annual elections. All residents of kasturi vatika phase 3 are cordially invited.',
+            attendees: 45,
+            image: 'https://images.unsplash.com/photo-1605722243979-fe0be8158232?w=800&q=80',
+            type: 'election'
+        }
     ];
 
     const upcomingPayment = payments.find(p => p.status === 'pending');
+
+    const handlePayment = (payment: any) => {
+        setSelectedPayment(payment);
+        setShowPaymentModal(true);
+    }
+
+    const handleEventPopup = (event: any) => {
+        setCurrentEvent(event);
+        setShowEventPopup(true);
+    }
 
     return (
         <div className="space-y-6">
@@ -96,7 +158,7 @@ export function OverviewTab({ user }: OverviewTabProps) {
                                 <span className="text-slate-600 dark:text-slate-400">Status</span>
                                 <StatusBadge variant="warning">Pending</StatusBadge>
                             </div>
-                            <GlassButton variant="primary" className="w-full mt-4">
+                            <GlassButton variant="primary" className="w-full mt-4" onClick={() => handlePayment(row)}>
                                 Pay Now
                             </GlassButton>
                         </div>
@@ -107,6 +169,19 @@ export function OverviewTab({ user }: OverviewTabProps) {
                         </div>
                     )}
                 </GlassCard>
+
+                {/* Payment Modal */}
+                {showPaymentModal && selectedPayment && (
+                    <PaymentModal
+                        openModal={showPaymentModal}
+                        onClose={() => {
+                            setShowPaymentModal(false);
+                            setSelectedPayment(null);
+                        }}
+                        title="Make Payment"
+                        payment={selectedPayment}
+                    />
+                )}
 
                 {/* Upcoming Events */}
                 <GlassCard className="p-4 md:p-6">
@@ -121,7 +196,8 @@ export function OverviewTab({ user }: OverviewTabProps) {
                         {upcomingEvents.map((event) => (
                             <div
                                 key={event.id}
-                                className="p-3 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+                                className="p-3 cursor-pointer rounded-xl bg-slate-100/50 dark:bg-slate-800/50 hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+                                onClick={() => handleEventPopup(event)}
                             >
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="flex-1 min-w-0">
@@ -147,6 +223,7 @@ export function OverviewTab({ user }: OverviewTabProps) {
                         ))}
                     </div>
                 </GlassCard>
+                {showEventPopup && <EventPopup event={currentEvent} onClose={() => setShowEventPopup(false)} />}
             </div>
 
             {/* Recent Activity */}

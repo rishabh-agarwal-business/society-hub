@@ -52,6 +52,17 @@ function AppContent() {
     setCurrentView('landing');
   };
 
+  const event = {
+    title: 'Annual Diwali Celebration',
+    colony: 'A Block',
+    date: 'November 25, 2025',
+    time: '6:00 PM - 10:00 PM',
+    location: 'Community Hall, A Block',
+    description: 'Join us for our annual Diwali celebration with cultural programs, dinner, and fireworks display. All residents of A Block are cordially invited.',
+    attendees: 87,
+    image: 'https://images.unsplash.com/photo-1605722243979-fe0be8158232?w=800&q=80'
+  };
+
   return (
     <div className="min-h-screen transition-colors duration-300 bg-linear-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-purple-950">
       {currentView === 'landing' ? (
@@ -72,6 +83,7 @@ function AppContent() {
 
       {showEventPopup && (
         <EventPopup
+          event={event}
           onClose={() => setShowEventPopup(false)}
         />
       )}

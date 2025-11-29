@@ -1,46 +1,67 @@
-import React, { SelectHTMLAttributes, forwardRef } from 'react';
 
-interface GlassSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Label } from "../ui/label";
+import { cn } from "../../lib/utils";
+
+interface GlassSelectProps {
     label?: string;
     error?: string;
-    options?: Array<{ value: string | number; label: string }>;
+    options: Array<{ value: string | number; label: string }>;
     icon?: React.ElementType;
+    placeholder?: string;
+    value?: string | number;
+    onValueChange?: (value: string) => void;
+    required?: boolean;
+    className?: string;
 }
 
-/**
- * Reusable glass morphism select component
- */
-export const GlassSelect = forwardRef<HTMLSelectElement, GlassSelectProps>(
-    ({ label, error, options, className = '', ...props }, ref) => {
-        return (
-            <div className="w-full">
-                {label && (
-                    <label className="block mb-2 text-sm text-slate-700 dark:text-slate-300">
-                        {label}
-                        {props.required && <span className="text-red-500 ml-1">*</span>}
-                    </label>
-                )}
-                <select
-                    ref={ref}
-                    className={`
-            glass-input w-full px-4 py-2 md:py-3 rounded-xl cursor-pointer
-            ${error ? 'border-red-500 dark:border-red-500' : ''}
-            ${className}
-          `}
-                    {...props}
-                >
-                    {options?.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
-                {error && (
-                    <p className="mt-1 text-sm text-red-500">{error}</p>
-                )}
-            </div>
-        );
-    }
-);
+export function GlassSelect({
+    label,
+    error,
+    options,
+    icon: Icon,
+    placeholder = "Select an option",
+    value,
+    onValueChange,
+    required,
+    className,
+}: GlassSelectProps) {
+    return (
+        <div className="w-full space-y-1.5">
+            {label && (
+                <Label className="text-sm font-medium">
+                    {label}
+                    {required && <span className="text-red-500">*</span>}
+                </Label>
+            )}
 
-GlassSelect.displayName = 'GlassSelect';
+            <Select value={value?.toString()} onValueChange={onValueChange}>
+                <SelectTrigger
+                    className={cn(
+                        "glass-input focus:ring-2 focus:ring-primary/50 transition relative w-full pr-10",
+                        error && "border-red-500",
+                        className
+                    )}
+                >
+                    {Icon && (
+                        <Icon
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4 pointer-events-none"
+                        />
+                    )}
+
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+
+                <SelectContent className="glass-panel border shadow-md">
+                    {options.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value.toString()}>
+                            {opt.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+
+            {error && <p className="text-sm text-red-500">{error}</p>}
+        </div>
+    );
+}

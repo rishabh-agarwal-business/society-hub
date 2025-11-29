@@ -1,22 +1,14 @@
 import { X, Calendar, MapPin, Users, Clock } from 'lucide-react';
 import { Button } from './ui/button';
+import { GlassButton } from './common/GlassButton';
 
 interface EventPopupProps {
     onClose: () => void;
+    event: any;
 }
 
-export function EventPopup({ onClose }: EventPopupProps) {
+export function EventPopup({ event, onClose }: EventPopupProps) {
     // Mock event data - would be filtered by colony in production
-    const event = {
-        title: 'Annual Diwali Celebration',
-        colony: 'A Block',
-        date: 'November 25, 2025',
-        time: '6:00 PM - 10:00 PM',
-        location: 'Community Hall, A Block',
-        description: 'Join us for our annual Diwali celebration with cultural programs, dinner, and fireworks display. All residents of A Block are cordially invited.',
-        attendees: 87,
-        image: 'https://images.unsplash.com/photo-1605722243979-fe0be8158232?w=800&q=80'
-    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 dark:bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-300">
@@ -29,12 +21,12 @@ export function EventPopup({ onClose }: EventPopupProps) {
                         className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 to-transparent"></div>
-                    <button
+                    <GlassButton
                         onClick={onClose}
-                        className="absolute top-4 right-4 glass-morphism p-2 rounded-xl hover:scale-105 transition-transform"
+                        className="absolute top-4 right-4 p-2 bg-transparent hover:scale-105 transition-transform"
                     >
-                        <X className="w-5 h-5 text-white" />
-                    </button>
+                        <X className="w-5 h-5 text-white cursor-pointer" />
+                    </GlassButton>
                     <div className="absolute bottom-4 left-6 right-6">
                         <div className="inline-block glass-morphism px-3 py-1 rounded-full text-white text-sm mb-2">
                             {event.colony}
@@ -86,16 +78,16 @@ export function EventPopup({ onClose }: EventPopupProps) {
                     </div>
 
                     <div className="flex gap-3 pt-2">
-                        <Button className="flex-1 glass-button-primary py-6">
+                        <GlassButton variant='primary' className="flex-1 py-6">
                             I'll Attend
-                        </Button>
-                        <Button
+                        </GlassButton>
+                        <GlassButton
                             onClick={onClose}
                             variant="outline"
-                            className="flex-1 glass-button py-6"
+                            className="flex-1 py-6 glass-button"
                         >
                             Maybe Later
-                        </Button>
+                        </GlassButton>
                     </div>
                 </div>
             </div>

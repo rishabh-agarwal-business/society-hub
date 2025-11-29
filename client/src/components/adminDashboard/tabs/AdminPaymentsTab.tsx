@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-    Search, Filter, Calendar, CheckCircle2, Clock, XCircle
+    Search, Filter, Calendar, CheckCircle2, Clock, XCircle, Edit2, IndianRupee
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
@@ -19,25 +19,24 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 
 /**
  * Admin Payments Tab Component
- * View and manage all society payments
+ * Monthly grid view where admin can update any member's payment for any month
  */
 export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
     const [members, setMembers] = useState<any[]>([]);
     const [payments, setPayments] = useState<any[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [selectedMonth, setSelectedMonth] = useState<string>('all');
-    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const [filterStatus, setFilterStatus] = useState<string>('all');
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [selectedMember, setSelectedMember] = useState<any>(null);
+    const [selectedMonth, setSelectedMonth] = useState<string>('');
     const [paymentAmount, setPaymentAmount] = useState('5000');
-    const [paymentMonth, setPaymentMonth] = useState('');
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [selectedYear]);
 
     const loadData = () => {
         if (user.societyId) {
@@ -48,40 +47,39 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
         }
     };
 
-    // Get payment records with member info
-    const getPaymentRecords = () => {
+    // Build payment records with monthly status
+    const paymentRecords = useMemo(() => {
         return members.map(member => {
             const memberPayments = payments.filter(p => p.userId === member.userId);
             const yearPayments = memberPayments.filter(p => p.year === selectedYear);
+
+            // Monthly status for each month
+            const monthlyStatus: Record<string, { status: 'paid' | 'pending'; amount: number; paymentId?: string }> = {};
+            MONTHS.forEach(month => {
+                const payment = yearPayments.find(p => p.month === month);
+                monthlyStatus[month] = {
+                    status: payment?.status === 'paid' ? 'paid' : 'pending',
+                    amount: payment?.amount || 5000,
+                    paymentId: payment?.id
+                };
+            });
+
             const paidCount = yearPayments.filter(p => p.status === 'paid').length;
             const totalPaid = yearPayments
                 .filter(p => p.status === 'paid')
                 .reduce((sum, p) => sum + p.amount, 0);
 
-            // Monthly status
-            const monthlyStatus: Record<string, 'paid' | 'pending'> = {};
-            MONTHS.forEach(month => {
-                const payment = yearPayments.find(p => p.month === month);
-                monthlyStatus[month] = payment?.status === 'paid' ? 'paid' : 'pending';
-            });
-
             return {
                 ...member,
-                paymentsCount: paidCount,
-                totalPaid,
                 monthlyStatus,
-                lastPayment: memberPayments.length > 0
-                    ? memberPayments.sort((a, b) =>
-                        new Date(b.paidDate || '').getTime() - new Date(a.paidDate || '').getTime()
-                    )[0]?.paidDate || '-'
-                    : '-',
+                paidCount,
+                totalPaid,
+                pendingCount: 12 - paidCount,
             };
         });
-    };
+    }, [members, payments, selectedYear]);
 
-    const paymentRecords = useMemo(() => getPaymentRecords(), [members, payments, selectedYear]);
-
-    // Filtered records
+    // Filter records
     const filteredRecords = useMemo(() => {
         let filtered = paymentRecords;
 
@@ -89,30 +87,22 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
         if (searchTerm) {
             filtered = filtered.filter(r =>
                 r.houseNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                r.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+                r.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                r.email.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
-        // Month filter - show only records with specific month status
-        if (selectedMonth !== 'all') {
-            if (selectedStatus === 'all') {
-                // No additional filter, show all for that month
-            } else if (selectedStatus === 'paid') {
-                filtered = filtered.filter(r => r.monthlyStatus[selectedMonth] === 'paid');
-            } else if (selectedStatus === 'pending') {
-                filtered = filtered.filter(r => r.monthlyStatus[selectedMonth] === 'pending' && r.hasAccount);
-            }
-        } else if (selectedStatus !== 'all') {
-            // Filter by overall payment status
-            if (selectedStatus === 'paid') {
-                filtered = filtered.filter(r => r.paymentsCount > 0);
-            } else if (selectedStatus === 'pending') {
-                filtered = filtered.filter(r => r.paymentsCount === 0 && r.hasAccount);
-            }
+        // Status filter
+        if (filterStatus === 'paid') {
+            filtered = filtered.filter(r => r.paidCount === 12);
+        } else if (filterStatus === 'pending') {
+            filtered = filtered.filter(r => r.paidCount < 12 && r.hasAccount);
+        } else if (filterStatus === 'partial') {
+            filtered = filtered.filter(r => r.paidCount > 0 && r.paidCount < 12);
         }
 
         return filtered;
-    }, [paymentRecords, searchTerm, selectedMonth, selectedStatus]);
+    }, [paymentRecords, searchTerm, filterStatus]);
 
     // Calculate stats
     const stats = {
@@ -122,12 +112,20 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
         totalPending: members.filter(m => m.hasAccount).length * 12 * 5000 -
             payments.filter(p => p.year === selectedYear && p.status === 'paid')
                 .reduce((sum, p) => sum + p.amount, 0),
-        totalPayments: payments.filter(p => p.year === selectedYear).length,
+        totalPayments: payments.filter(p => p.year === selectedYear && p.status === 'paid').length,
+        fullyPaidMembers: paymentRecords.filter(r => r.paidCount === 12 && r.hasAccount).length,
     };
 
-    const handleUpdatePayment = (member: any, month: string) => {
+    const handleCellClick = (member: any, month: string) => {
+        if (!member.hasAccount) {
+            setError('Member does not have an account');
+            setTimeout(() => setError(''), 3000);
+            return;
+        }
+
         setSelectedMember(member);
-        setPaymentMonth(month);
+        setSelectedMonth(month);
+        setPaymentAmount(member.monthlyStatus[month].amount.toString());
         setShowPaymentModal(true);
     };
 
@@ -139,12 +137,12 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
         }
 
         try {
-            const currentStatus = selectedMember.monthlyStatus[paymentMonth];
+            const currentStatus = selectedMember.monthlyStatus[selectedMonth].status;
             const newStatus = currentStatus === 'paid' ? 'pending' : 'paid';
 
             authService.updatePayment(
                 selectedMember.userId,
-                paymentMonth,
+                selectedMonth,
                 selectedYear,
                 parseInt(paymentAmount),
                 newStatus
@@ -153,8 +151,10 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
             setSuccess(`Payment ${newStatus === 'paid' ? 'marked as paid' : 'marked as pending'} successfully!`);
             setShowPaymentModal(false);
             loadData();
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err: any) {
             setError(err.message || 'Failed to update payment');
+            setTimeout(() => setError(''), 3000);
         }
     };
 
@@ -168,7 +168,7 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                     Payment Management
                 </h1>
                 <p className="text-slate-600 dark:text-slate-400">
-                    Track and manage society payments
+                    Track and manage society payments - Click on any cell to update payment status
                 </p>
             </div>
 
@@ -188,7 +188,7 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
             )}
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <GlassCard className="p-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
@@ -230,6 +230,20 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                         </div>
                     </div>
                 </GlassCard>
+
+                <GlassCard className="p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                            <CheckCircle2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-slate-600 dark:text-slate-400">Fully Paid</p>
+                            <p className="text-lg text-slate-900 dark:text-white">
+                                {stats.fullyPaidMembers} members
+                            </p>
+                        </div>
+                    </div>
+                </GlassCard>
             </div>
 
             {/* Filters */}
@@ -239,56 +253,42 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                     <h2 className="text-lg text-slate-900 dark:text-white">Filters</h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <GlassInput
                         label="Search"
-                        placeholder="Search by name or house..."
+                        placeholder="Search by name, house or email..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        icon={<Search className='h-4 w-4' />}
+                        icon={<Search className="w-4 h-4" />}
                     />
 
                     <GlassSelect
                         label="Year"
                         value={selectedYear.toString()}
-                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                         icon={Calendar}
-                    >
-                        {years.map(year => (
-                            <option key={year} value={year}>{year}</option>
-                        ))}
-                    </GlassSelect>
+                        onValueChange={(e: any) => setSelectedYear(parseInt(e.target.value))}
+                        options={years.map(year => ({ value: year, label: year.toString() }))}
+                    />
 
                     <GlassSelect
-                        label="Month"
-                        value={selectedMonth}
-                        onChange={(e) => setSelectedMonth(e.target.value)}
-                    >
-                        <option value="all">All Months</option>
-                        {MONTHS.map(month => (
-                            <option key={month} value={month}>{month}</option>
-                        ))}
-                    </GlassSelect>
-
-                    <GlassSelect
-                        label="Status"
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
-                        icon={Filter}
-                    >
-                        <option value="all">All Status</option>
-                        <option value="paid">Paid</option>
-                        <option value="pending">Pending</option>
-                    </GlassSelect>
+                        label="Payment Status"
+                        value={filterStatus}
+                        icon={IndianRupee}
+                        onValueChange={(e: any) => setFilterStatus(e.target.value)}
+                        options={[
+                            { value: 'all', label: 'All Members' },
+                            { value: 'paid', label: 'Fully Paid (12/12)' },
+                            { value: 'partial', label: 'Partially Paid' },
+                            { value: 'pending', label: 'Pending Payments' }
+                        ]}
+                    />
 
                     <div className="flex items-end">
                         <GlassButton
-                            variant="outline"
-                            className="w-full"
+                            className="glass-button"
                             onClick={() => {
                                 setSearchTerm('');
-                                setSelectedMonth('all');
-                                setSelectedStatus('all');
+                                setFilterStatus('all');
                             }}
                         >
                             Clear Filters
@@ -297,26 +297,38 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                 </div>
             </GlassCard>
 
-            {/* Payments Table */}
+            {/* Payment Grid */}
             <GlassCard className="p-4 md:p-6">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg text-slate-900 dark:text-white">
-                        Payment Records
+                        Monthly Payment Grid - {selectedYear}
                     </h2>
                     <span className="text-sm text-slate-600 dark:text-slate-400">
-                        {filteredRecords.length} records
+                        {filteredRecords.length} members
                     </span>
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-max">
                         <thead>
                             <tr className="border-b border-slate-200 dark:border-slate-700">
-                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400">House</th>
-                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400">Owner</th>
-                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400">Paid Count</th>
-                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400">Total Paid</th>
-                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400">Actions</th>
+                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400 sticky left-0 bg-white dark:bg-slate-900 z-10">
+                                    Member
+                                </th>
+                                <th className="text-left p-3 text-sm text-slate-600 dark:text-slate-400 sticky left-0 bg-white dark:bg-slate-900 z-10">
+                                    House
+                                </th>
+                                {MONTHS.map(month => (
+                                    <th key={month} className="text-center p-2 text-xs text-slate-600 dark:text-slate-400">
+                                        {month.substring(0, 3)}
+                                    </th>
+                                ))}
+                                <th className="text-center p-3 text-sm text-slate-600 dark:text-slate-400">
+                                    Status
+                                </th>
+                                <th className="text-right p-3 text-sm text-slate-600 dark:text-slate-400">
+                                    Total Paid
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -325,38 +337,59 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                                     key={record.id}
                                     className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
                                 >
-                                    <td className="p-3 text-slate-900 dark:text-white">{record.houseNumber}</td>
-                                    <td className="p-3 text-slate-900 dark:text-white">{record.ownerName}</td>
-                                    <td className="p-3 text-slate-600 dark:text-slate-400">{record.paymentsCount}/12</td>
-                                    <td className="p-3 text-slate-900 dark:text-white">₹{record.totalPaid.toLocaleString()}</td>
-                                    <td className="p-3">
-                                        <div className="flex flex-wrap gap-1">
-                                            {selectedMonth !== 'all' && record.hasAccount ? (
-                                                <GlassButton
-                                                    variant={record.monthlyStatus[selectedMonth] === 'paid' ? 'success' : 'warning'}
-                                                    size="sm"
-                                                    onClick={() => handleUpdatePayment(record, selectedMonth)}
-                                                >
-                                                    {record.monthlyStatus[selectedMonth] === 'paid' ? (
-                                                        <>
-                                                            <CheckCircle2 className="w-3 h-3 mr-1" />
-                                                            Paid
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Clock className="w-3 h-3 mr-1" />
-                                                            Mark Paid
-                                                        </>
-                                                    )}
-                                                </GlassButton>
-                                            ) : record.hasAccount ? (
-                                                <StatusBadge variant={record.paymentsCount > 0 ? 'success' : 'warning'} size="sm">
-                                                    {record.paymentsCount > 0 ? 'Active' : 'Pending'}
-                                                </StatusBadge>
-                                            ) : (
-                                                <StatusBadge variant="danger" size="sm">No Account</StatusBadge>
-                                            )}
+                                    <td className="p-3 text-sm text-slate-900 dark:text-white sticky left-0 bg-white dark:bg-slate-900">
+                                        <div>
+                                            <div className="truncate max-w-[150px]">{record.ownerName}</div>
+                                            <div className="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[150px]">
+                                                {record.email}
+                                            </div>
                                         </div>
+                                    </td>
+                                    <td className="p-3 text-sm text-slate-900 dark:text-white sticky left-0 bg-white dark:bg-slate-900">
+                                        {record.houseNumber}
+                                    </td>
+                                    {MONTHS.map(month => (
+                                        <td key={month} className="p-1">
+                                            {record.hasAccount ? (
+                                                <button
+                                                    onClick={() => handleCellClick(record, month)}
+                                                    className={`
+                            w-full h-10 rounded-lg flex items-center justify-center transition-all
+                            ${record.monthlyStatus[month].status === 'paid'
+                                                            ? 'bg-green-500/20 hover:bg-green-500/30 border border-green-500/30'
+                                                            : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                                                        }
+                          `}
+                                                    title={`${month}: ${record.monthlyStatus[month].status} - ₹${record.monthlyStatus[month].amount}`}
+                                                >
+                                                    {record.monthlyStatus[month].status === 'paid' ? (
+                                                        <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                                    ) : (
+                                                        <Edit2 className="w-3 h-3 text-slate-400" />
+                                                    )}
+                                                </button>
+                                            ) : (
+                                                <div className="w-full h-10 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center">
+                                                    <XCircle className="w-3 h-3 text-slate-300 dark:text-slate-600" />
+                                                </div>
+                                            )}
+                                        </td>
+                                    ))}
+                                    <td className="p-3 text-center">
+                                        <StatusBadge
+                                            variant={
+                                                !record.hasAccount ? 'danger' :
+                                                    record.paidCount === 12 ? 'success' :
+                                                        record.paidCount > 0 ? 'warning' :
+                                                            'danger'
+                                            }
+                                            size="sm"
+                                        >
+                                            {!record.hasAccount ? 'No Account' : `${record.paidCount}/12`}
+                                        </StatusBadge>
+                                    </td>
+                                    <td className="p-3 text-right text-sm text-slate-900 dark:text-white">
+                                        ₹{record.totalPaid.toLocaleString()}
                                     </td>
                                 </tr>
                             ))}
@@ -369,53 +402,94 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                         </div>
                     )}
                 </div>
+
+                {/* Legend */}
+                <div className="mt-4 flex items-center gap-6 text-xs text-slate-600 dark:text-slate-400">
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                            <CheckCircle2 className="w-3 h-3 text-green-600" />
+                        </div>
+                        <span>Paid</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                            <Edit2 className="w-3 h-3 text-slate-400" />
+                        </div>
+                        <span>Pending (Click to update)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center">
+                            <XCircle className="w-3 h-3 text-slate-300" />
+                        </div>
+                        <span>No Account</span>
+                    </div>
+                </div>
             </GlassCard>
 
-            {/* Payment Modal */}
-            {showPaymentModal && selectedMember && (
+            {/* Payment Update Modal */}
+            {showPaymentModal && selectedMember && selectedMonth && (
                 <Modal
                     isOpen={showPaymentModal}
                     onClose={() => {
                         setShowPaymentModal(false);
                         setSelectedMember(null);
+                        setSelectedMonth('');
                     }}
-                    title={`Update Payment - ${selectedMember.ownerName}`}
+                    title={`Update Payment`}
                 >
                     <form onSubmit={handleSubmitPayment} className="space-y-4">
                         <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-slate-600 dark:text-slate-400">Member</span>
+                                <span className="text-slate-900 dark:text-white">{selectedMember.ownerName}</span>
+                            </div>
                             <div className="flex justify-between mb-2">
                                 <span className="text-slate-600 dark:text-slate-400">House</span>
                                 <span className="text-slate-900 dark:text-white">{selectedMember.houseNumber}</span>
                             </div>
                             <div className="flex justify-between mb-2">
                                 <span className="text-slate-600 dark:text-slate-400">Month</span>
-                                <span className="text-slate-900 dark:text-white">{paymentMonth} {selectedYear}</span>
+                                <span className="text-slate-900 dark:text-white">{selectedMonth} {selectedYear}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-600 dark:text-slate-400">Current Status</span>
-                                <StatusBadge variant={selectedMember.monthlyStatus[paymentMonth] === 'paid' ? 'success' : 'warning'}>
-                                    {selectedMember.monthlyStatus[paymentMonth]}
+                                <StatusBadge variant={selectedMember.monthlyStatus[selectedMonth].status === 'paid' ? 'success' : 'warning'}>
+                                    {selectedMember.monthlyStatus[selectedMonth].status}
                                 </StatusBadge>
                             </div>
                         </div>
 
                         <GlassInput
-                            label="Amount"
+                            label="Amount (₹)"
                             type="number"
                             value={paymentAmount}
                             onChange={(e) => setPaymentAmount(e.target.value)}
                             required
+                            min="0"
                         />
 
                         <div className="flex gap-2 pt-4">
                             <GlassButton type="submit" variant="primary" className="flex-1">
-                                {selectedMember.monthlyStatus[paymentMonth] === 'paid' ? 'Mark as Pending' : 'Mark as Paid'}
+                                {selectedMember.monthlyStatus[selectedMonth].status === 'paid' ? (
+                                    <>
+                                        <XCircle className="w-4 h-4 mr-2" />
+                                        Mark as Pending
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                                        Mark as Paid
+                                    </>
+                                )}
                             </GlassButton>
                             <GlassButton
                                 type="button"
-                                variant="outline"
                                 className="flex-1"
-                                onClick={() => setShowPaymentModal(false)}
+                                onClick={() => {
+                                    setShowPaymentModal(false);
+                                    setSelectedMember(null);
+                                    setSelectedMonth('');
+                                }}
                             >
                                 Cancel
                             </GlassButton>

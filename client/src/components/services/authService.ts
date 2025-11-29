@@ -72,6 +72,7 @@ class AuthService {
                     name: 'John Doe',
                     role: 'society_admin',
                     societyId: 'soc-001',
+                    phone: '0000000000'
                 },
                 {
                     id: 'admin-002',
@@ -79,6 +80,7 @@ class AuthService {
                     name: 'Jane Smith',
                     role: 'society_admin',
                     societyId: 'soc-002',
+                    phone: '0000000000'
                 }
             );
             localStorage.setItem(this.storageKeys.users, JSON.stringify(users));
@@ -137,6 +139,7 @@ class AuthService {
                 role: 'member',
                 societyId: 'soc-001',
                 houseNumber: 'A-103',
+                phone: '0000000000'
             });
             localStorage.setItem(this.storageKeys.users, JSON.stringify(users));
             this.setPassword('amit@example.com', 'member@123');
@@ -222,6 +225,7 @@ class AuthService {
             email,
             name,
             role: 'society_admin',
+            phone: '0000000000'
         };
 
         users.push(newAdmin);
@@ -263,6 +267,7 @@ class AuthService {
             role: 'member',
             societyId,
             houseNumber,
+            phone: '0000000000'
         };
 
         users.push(newUser);

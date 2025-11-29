@@ -92,7 +92,7 @@ export function AnalyticsTab({ user }: AnalyticsTabProps) {
                         Track your payment trends and expenses
                     </p>
                 </div>
-                <GlassButton variant="outline">
+                <GlassButton variant="outline" className='glass-button'>
                     <Download className="w-4 h-4 mr-2" />
                     Export Report
                 </GlassButton>
@@ -101,27 +101,29 @@ export function AnalyticsTab({ user }: AnalyticsTabProps) {
             {/* Year Selector */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <GlassSelect
-                    label="Current Year"
+                    label="Year"
                     value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value)}
+                    onValueChange={setSelectedYear}
                     icon={Calendar}
-                >
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                </GlassSelect>
+                    options={[
+                        { value: "2023", label: "2023" },
+                        { value: "2024", label: "2024" },
+                        { value: "2025", label: "2025" },
+                        { value: "2026", label: "2026" },
+                    ]}
+                />
 
                 <GlassSelect
                     label="Compare With"
                     value={comparisonYear}
-                    onChange={(e) => setComparisonYear(e.target.value)}
+                    onValueChange={setComparisonYear}
                     icon={Calendar}
-                >
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                </GlassSelect>
+                    options={[
+                        { value: "2023", label: "2023" },
+                        { value: "2024", label: "2024" },
+                        { value: "2025", label: "2025" },
+                    ]}
+                />
             </div>
 
             {/* Summary Cards */}

@@ -107,13 +107,10 @@ export function AdminAnalyticsTab({ user }: AdminAnalyticsTabProps) {
                 <GlassSelect
                     label="Year"
                     value={selectedYear.toString()}
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                     icon={Calendar}
-                >
-                    {years.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                    ))}
-                </GlassSelect>
+                    onValueChange={(e: any) => setSelectedYear(parseInt(e.target.value))}
+                    options={years.map(year => ({ value: year, label: year.toString() }))}
+                />
             </div>
 
             {/* Key Metrics */}

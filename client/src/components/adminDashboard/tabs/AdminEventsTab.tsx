@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-    Plus, Calendar, Trash2, Bell, Users, FileText
+    Plus, Calendar, Trash2, Bell, Users, FileText, Filter, Search, Tickets
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
@@ -22,6 +22,9 @@ interface AdminEventsTabProps {
  */
 export function AdminEventsTab({ user }: AdminEventsTabProps) {
     const [events, setEvents] = useState<SocietyEvent[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterType, setFilterType] = useState<string>('all');
+    const [filterDateRange, setFilterDateRange] = useState<'all' | 'upcoming' | 'past'>('all');
     const [showAddEvent, setShowAddEvent] = useState(false);
     const [eventTitle, setEventTitle] = useState('');
     const [eventDescription, setEventDescription] = useState('');
@@ -107,8 +110,26 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
         }
     };
 
-    const upcomingEvents = events.filter(e => new Date(e.date) >= new Date());
-    const pastEvents = events.filter(e => new Date(e.date) < new Date());
+    // Filter events
+    const filteredEvents = events.filter(event => {
+        const matchesSearch = searchTerm === '' ||
+            event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            event.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesType = filterType === 'all' || event.type === filterType;
+
+        const eventDate = new Date(event.date);
+        const today = new Date();
+        const matchesDate =
+            filterDateRange === 'all' ||
+            (filterDateRange === 'upcoming' && eventDate >= today) ||
+            (filterDateRange === 'past' && eventDate < today);
+
+        return matchesSearch && matchesType && matchesDate;
+    });
+
+    const upcomingEvents = filteredEvents.filter(e => new Date(e.date) >= new Date());
+    const pastEvents = filteredEvents.filter(e => new Date(e.date) < new Date());
 
     return (
         <div className="space-y-6">
@@ -146,11 +167,67 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
                 </div>
             )}
 
+            {/* Filters */}
+            <GlassCard className="p-4 md:p-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                    <h2 className="text-lg text-slate-900 dark:text-white">Filters</h2>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <GlassInput
+                        label="Search Events"
+                        placeholder="Search by title or description..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        icon={<Search className="w-4 h-4" />}
+                    />
+
+                    <GlassSelect
+                        label="Event Type"
+                        value={filterType}
+                        icon={Tickets}
+                        onValueChange={(e: any) => setFilterType(e.target.value)}
+                        options={[
+                            { value: 'all', label: 'All Types' },
+                            { value: 'announcement', label: 'Announcement' },
+                            { value: 'meeting', label: 'Meeting' },
+                            { value: 'event', label: 'Event' },
+                            { value: 'notice', label: 'Notice' }
+                        ]}
+                    />
+
+                    <GlassSelect
+                        label="Date Range"
+                        icon={Calendar}
+                        value={filterDateRange}
+                        onValueChange={(e: any) => setFilterDateRange(e.target.value as any)}
+                        options={[
+                            { value: 'all', label: 'All Events' },
+                            { value: 'upcoming', label: 'Upcoming Only' },
+                            { value: 'past', label: 'Past Only' }
+                        ]}
+                    />
+
+                    <div className="flex items-end">
+                        <GlassButton
+                            onClick={() => {
+                                setSearchTerm('');
+                                setFilterType('all');
+                                setFilterDateRange('all');
+                            }}
+                        >
+                            Clear Filters
+                        </GlassButton>
+                    </div>
+                </div>
+            </GlassCard>
+
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <GlassCard className="p-4">
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Total Events</p>
-                    <p className="text-2xl text-slate-900 dark:text-white">{events.length}</p>
+                    <p className="text-2xl text-slate-900 dark:text-white">{filteredEvents.length}</p>
                 </GlassCard>
                 <GlassCard className="p-4">
                     <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Upcoming</p>
@@ -314,13 +391,14 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
                         <GlassSelect
                             label="Event Type"
                             value={eventType}
-                            onChange={(e) => setEventType(e.target.value as SocietyEvent['type'])}
-                        >
-                            <option value="announcement">Announcement</option>
-                            <option value="meeting">Meeting</option>
-                            <option value="event">Event</option>
-                            <option value="notice">Notice</option>
-                        </GlassSelect>
+                            onValueChange={(e: any) => setEventType(e.target.value as SocietyEvent['type'])}
+                            options={[
+                                { value: 'announcement', label: 'Announcement' },
+                                { value: 'meeting', label: 'Meeting' },
+                                { value: 'event', label: 'Event' },
+                                { value: 'notice', label: 'Notice' }
+                            ]}
+                        />
 
                         <GlassInput
                             label="Event Date"
@@ -336,7 +414,6 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
                             </GlassButton>
                             <GlassButton
                                 type="button"
-                                variant="outline"
                                 className="flex-1"
                                 onClick={() => setShowAddEvent(false)}
                             >

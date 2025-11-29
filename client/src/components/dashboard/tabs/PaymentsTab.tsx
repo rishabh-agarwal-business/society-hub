@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     CreditCard, Filter, Download, Calendar,
-    CheckCircle2, Clock, AlertCircle, Search
+    CheckCircle2, Clock, Search
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
@@ -9,9 +9,9 @@ import { GlassInput } from '../../common/GlassInput';
 import { GlassSelect } from '../../common/GlassSelect';
 import { Column, ResponsiveTable } from '../../common/ResponsiveTable';
 import { StatusBadge } from '../../common/StatusBadge';
-import { Modal } from '../../common/Modal';
 import { usePayments } from '../../../hooks/usePayments';
 import { User } from '../../../types';
+import PaymentModal from '../../modals/PaymentModal';
 
 interface PaymentsTabProps {
     user: User;
@@ -118,7 +118,7 @@ export function PaymentsTab({ user }: PaymentsTabProps) {
                     )}
 
                     {row.status === 'paid' && (
-                        <GlassButton variant="outline" size="sm" onClick={() => handleDownloadReceipt(row)}>
+                        <GlassButton className='glass-button' variant="outline" size="sm" onClick={() => handleDownloadReceipt(row)}>
                             <Download className="w-4 h-4" />
                         </GlassButton>
                     )}
@@ -126,7 +126,6 @@ export function PaymentsTab({ user }: PaymentsTabProps) {
             ),
         },
     ];
-
 
     return (
         <div className="space-y-6">
@@ -204,32 +203,34 @@ export function PaymentsTab({ user }: PaymentsTabProps) {
                     <GlassSelect
                         label="Year"
                         value={selectedYear}
-                        onChange={(e) => setSelectedYear(e.target.value)}
+                        onValueChange={setSelectedYear}
                         icon={Calendar}
-                    >
-                        <option value="all">All Years</option>
-                        <option value="2023">2023</option>
-                        <option value="2024">2024</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                    </GlassSelect>
+                        options={[
+                            { value: "all", label: "All Years" },
+                            { value: "2023", label: "2023" },
+                            { value: "2024", label: "2024" },
+                            { value: "2025", label: "2025" },
+                            { value: "2026", label: "2026" },
+                        ]}
+                    />
 
                     <GlassSelect
-                        label="Status"
+                        label='Status'
                         value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        onValueChange={setSelectedStatus}
                         icon={Filter}
-                    >
-                        <option value="all">All Status</option>
-                        <option value="paid">Paid</option>
-                        <option value="pending">Pending</option>
-                        <option value="overdue">Overdue</option>
-                    </GlassSelect>
+                        options={[
+                            { value: 'all', label: 'All Status' },
+                            { value: 'paid', label: 'Paid' },
+                            { value: 'pending', label: 'Pending' },
+                            { value: 'overdue', label: 'Overdue' },
+                        ]}
+                    />
 
                     <div className="flex items-end">
                         <GlassButton
                             variant="outline"
-                            className="w-full"
+                            className="glass-button"
                             onClick={() => {
                                 setSelectedYear('all');
                                 setSelectedStatus('all');
@@ -263,47 +264,15 @@ export function PaymentsTab({ user }: PaymentsTabProps) {
 
             {/* Payment Modal */}
             {showPaymentModal && selectedPayment && (
-                <Modal
-                    isOpen={showPaymentModal}
+                <PaymentModal
+                    openModal={showPaymentModal}
                     onClose={() => {
                         setShowPaymentModal(false);
                         setSelectedPayment(null);
                     }}
                     title="Make Payment"
-                >
-                    <div className="space-y-4">
-                        <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-800">
-                            <div className="flex justify-between mb-2">
-                                <span className="text-slate-600 dark:text-slate-400">Month</span>
-                                <span className="text-slate-900 dark:text-white">
-                                    {selectedPayment.month} {selectedPayment.year}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-slate-600 dark:text-slate-400">Amount</span>
-                                <span className="text-xl text-slate-900 dark:text-white">
-                                    ₹{selectedPayment.amount.toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <GlassButton variant="primary" className="w-full">
-                                Pay with UPI
-                            </GlassButton>
-                            <GlassButton variant="outline" className="w-full">
-                                Pay with Card
-                            </GlassButton>
-                            <GlassButton variant="outline" className="w-full">
-                                Pay with Net Banking
-                            </GlassButton>
-                        </div>
-
-                        <p className="text-xs text-center text-slate-600 dark:text-slate-400">
-                            Your payment is secure and encrypted
-                        </p>
-                    </div>
-                </Modal>
+                    payment={selectedPayment}
+                />
             )}
         </div>
     );

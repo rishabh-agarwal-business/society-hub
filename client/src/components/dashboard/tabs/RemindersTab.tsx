@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     Bell, Mail, MessageSquare, Phone, Check,
-    Calendar, Clock, AlertCircle, Settings
+    Calendar, Clock, Settings
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
@@ -131,6 +131,7 @@ export function RemindersTab({ user }: RemindersTabProps) {
                 </div>
                 <GlassButton
                     variant="outline"
+                    className='glass-button'
                     onClick={() => setShowPreferences(true)}
                 >
                     <Settings className="w-4 h-4 mr-2" />

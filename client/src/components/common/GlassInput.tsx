@@ -1,20 +1,23 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, forwardRef } from "react"
+import { Input } from "../ui/input"
+import { cn } from "../../lib/utils"
+import { Label } from "../ui/label"
 
 interface GlassInputProps extends InputHTMLAttributes<HTMLInputElement> {
-    label?: string;
-    error?: string;
-    icon?: React.ReactNode;   // <-- FIXED
+    label?: string
+    error?: string
+    icon?: React.ReactNode
 }
 
 export const GlassInput = forwardRef<HTMLInputElement, GlassInputProps>(
-    ({ label, error, icon, className = '', ...props }, ref) => {
+    ({ label, error, icon, className, required, ...props }, ref) => {
         return (
-            <div className="w-full">
+            <div className="w-full space-y-1.5">
                 {label && (
-                    <label className="block mb-2 text-sm text-slate-700 dark:text-slate-300">
+                    <Label className="text-sm font-medium">
                         {label}
-                        {props.required && <span className="text-red-500 ml-1">*</span>}
-                    </label>
+                        {required && <span className="text-red-500">*</span>}
+                    </Label>
                 )}
 
                 <div className="relative">
@@ -24,22 +27,23 @@ export const GlassInput = forwardRef<HTMLInputElement, GlassInputProps>(
                         </div>
                     )}
 
-                    <input
+                    <Input
                         ref={ref}
-                        className={`
-                            glass-input w-full px-4 py-2 md:py-3 rounded-xl
-                            ${icon ? 'pl-10' : ''}
-                            ${error ? 'border-red-500 dark:border-red-500' : ''}
-                            ${className}
-                        `}
+                        className={cn(
+                            "glass-panel px-4 py-2 md:py-3",
+                            icon && "pl-10",
+                            error && "border-red-500 dark:border-red-500",
+                            className
+                        )}
+                        required={required}
                         {...props}
                     />
                 </div>
 
                 {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
             </div>
-        );
+        )
     }
-);
+)
 
-GlassInput.displayName = 'GlassInput';
+GlassInput.displayName = "GlassInput"

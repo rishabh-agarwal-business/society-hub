@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
     Building2, Users, DollarSign, Calendar,
-    CheckCircle2, UserX, TrendingUp
+    CheckCircle2, UserX, TrendingUp, Filter, Search
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { StatsCard } from '../../common/StatsCard';
+import { GlassSelect } from '../../common/GlassSelect';
+import { GlassInput } from '../../common/GlassInput';
+import { GlassButton } from '../../common/GlassButton';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { User } from '../../../types';
@@ -23,6 +26,8 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 export function AdminOverviewTab({ user }: AdminOverviewTabProps) {
     const { isDarkMode } = useTheme();
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedMonth, setSelectedMonth] = useState<string>('all');
+    const [searchTerm, setSearchTerm] = useState('');
     const [society, setSociety] = useState<any>(null);
     const [members, setMembers] = useState<any[]>([]);
     const [events, setEvents] = useState<any[]>([]);
@@ -79,6 +84,18 @@ export function AdminOverviewTab({ user }: AdminOverviewTabProps) {
 
     const years = [2023, 2024, 2025, 2026];
 
+    // Filter members based on search
+    const filteredMembers = members.filter(m =>
+        searchTerm === '' ||
+        m.houseNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Filter payments based on month
+    const filteredPayments = selectedMonth === 'all'
+        ? payments.filter(p => p.year === selectedYear)
+        : payments.filter(p => p.year === selectedYear && p.month === selectedMonth);
+
     if (!society) {
         return (
             <div className="space-y-6">
@@ -115,23 +132,57 @@ export function AdminOverviewTab({ user }: AdminOverviewTabProps) {
                         Society Management Dashboard
                     </p>
                 </div>
-                <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    className={`
-            px-4 py-2 rounded-xl border transition-colors
-            ${isDarkMode
-                            ? 'bg-white/10 border-white/20 text-white hover:bg-white/20'
-                            : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50'
-                        }
-            focus:outline-none focus:ring-2 focus:ring-blue-500/50
-          `}
-                >
-                    {years.map(year => (
-                        <option key={year} value={year}>{year}</option>
-                    ))}
-                </select>
             </div>
+
+            {/* Filters */}
+            <GlassCard className="p-4 md:p-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <Filter className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                    <h2 className="text-lg text-slate-900 dark:text-white">Filters</h2>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* <GlassInput
+                        label="Search Members"
+                        placeholder="Search by name or house..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        icon={<Search className="w-4 h-4" />}
+                    /> */}
+
+                    <GlassSelect
+                        label="Year"
+                        value={selectedYear.toString()}
+                        icon={Calendar}
+                        onValueChange={(e: any) => setSelectedYear(parseInt(e.target.value))}
+                        options={years.map(year => ({ value: year, label: year.toString() }))}
+                    />
+
+                    <GlassSelect
+                        label="Month"
+                        value={selectedMonth}
+                        icon={Filter}
+                        onValueChange={(e: any) => setSelectedMonth(e.target.value)}
+                        options={[
+                            { value: 'all', label: 'All Months' },
+                            ...MONTHS.map(month => ({ value: month, label: month }))
+                        ]}
+                    />
+
+                    <div className="flex items-end">
+                        <GlassButton
+                            variant="outline"
+                            className="glass-button"
+                            onClick={() => {
+                                setSearchTerm('');
+                                setSelectedMonth('all');
+                            }}
+                        >
+                            Clear Filters
+                        </GlassButton>
+                    </div>
+                </div>
+            </GlassCard>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import {
     User as UserIcon, Mail, Phone, Home, Lock,
-    Bell, CreditCard, Shield, Save, Eye, EyeOff
+    Bell, CreditCard, Shield, Save, Eye, EyeOff, Calendar
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
 import { GlassInput } from '../../common/GlassInput';
 import { StatusBadge } from '../../common/StatusBadge';
 import { User } from '../../../types';
+import { GlassSelect } from '../../common/GlassSelect';
 
 interface SettingsTabProps {
     user: User;
@@ -213,7 +214,7 @@ export function SettingsTab({ user }: SettingsTabProps) {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                                className="absolute cursor-pointer right-3 top-9 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                                             >
                                                 {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                             </button>
@@ -231,7 +232,7 @@ export function SettingsTab({ user }: SettingsTabProps) {
                                             <button
                                                 type="button"
                                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                                className="absolute cursor-pointer right-3 top-9 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                                             >
                                                 {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                             </button>
@@ -268,7 +269,7 @@ export function SettingsTab({ user }: SettingsTabProps) {
                                         </div>
                                         <StatusBadge variant="warning">Disabled</StatusBadge>
                                     </div>
-                                    <GlassButton variant="outline">
+                                    <GlassButton>
                                         <Shield className="w-4 h-4 mr-2" />
                                         Enable 2FA
                                     </GlassButton>
@@ -463,25 +464,24 @@ export function SettingsTab({ user }: SettingsTabProps) {
 
                                 {/* Reminder Days */}
                                 <div>
-                                    <label className="text-sm text-slate-900 dark:text-white mb-3 block">
-                                        Payment Reminder (days before due date)
-                                    </label>
-                                    <select
+                                    <GlassSelect
+                                        label='Payment Reminder (days before due date)'
                                         value={paymentPrefs.reminderDays}
-                                        onChange={(e) =>
+                                        onValueChange={(e: any) =>
                                             setPaymentPrefs({
                                                 ...paymentPrefs,
                                                 reminderDays: parseInt(e.target.value),
                                             })
                                         }
-                                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-colors"
-                                    >
-                                        <option value={1}>1 day before</option>
-                                        <option value={3}>3 days before</option>
-                                        <option value={5}>5 days before</option>
-                                        <option value={7}>7 days before</option>
-                                        <option value={10}>10 days before</option>
-                                    </select>
+                                        icon={Calendar}
+                                        options={[
+                                            { value: '1', label: '1 day before' },
+                                            { value: '3', label: '3 day before' },
+                                            { value: '5', label: '5 day before' },
+                                            { value: '7', label: '7 day before' },
+                                            { value: '10', label: '10 day before' },
+                                        ]}
+                                    />
                                 </div>
 
                                 <div className="pt-4">

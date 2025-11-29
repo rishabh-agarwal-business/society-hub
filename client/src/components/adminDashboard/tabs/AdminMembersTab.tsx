@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
     Search, Plus, Edit, CheckCircle2, UserX,
-    ArrowUpDown, ChevronUp, ChevronDown
+    ArrowUpDown, ChevronUp, ChevronDown, ChartNoAxesCombined, CircleUser
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
@@ -10,6 +10,7 @@ import { Modal } from '../../common/Modal';
 import { StatusBadge } from '../../common/StatusBadge';
 import { SocietyMember, User } from '../../../types';
 import { authService } from '../../services/authService';
+import { GlassSelect } from '../../common/GlassSelect';
 
 interface AdminMembersTabProps {
     user: User;
@@ -39,6 +40,8 @@ export function AdminMembersTab({ user }: AdminMembersTabProps) {
 
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    const [statusFilter, setStatusFilter] = useState('all');
 
     useEffect(() => {
         loadMembers();
@@ -216,13 +219,40 @@ export function AdminMembersTab({ user }: AdminMembersTabProps) {
 
             {/* Search */}
             <GlassCard className="p-4 md:p-6">
-                <GlassInput
-                    label="Search Members"
-                    placeholder="Search by name, house, email or phone..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    icon={<Search className='w-4 h-4' />}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <GlassInput
+                        label="Search Members"
+                        placeholder="Search by name, house, email or phone..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        icon={<Search />}
+                    />
+
+                    <GlassSelect
+                        label="Account Status"
+                        value={statusFilter}
+                        icon={CircleUser}
+                        onValueChange={(e: any) => setStatusFilter(e.target.value)}
+                        options={[
+                            { value: 'all', label: 'All' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'on-hold', label: 'On Hold' },
+                            { value: 'expired', label: 'Expired' },
+                        ]}
+                    />
+
+                    <div className="flex items-end">
+                        <GlassButton
+                            className="glass-button"
+                            onClick={() => {
+                                setStatusFilter('all');
+                                setSearchTerm('');
+                            }}
+                        >
+                            Clear Filters
+                        </GlassButton>
+                    </div>
+                </div>
             </GlassCard>
 
             {/* Members Table */}
@@ -307,7 +337,7 @@ export function AdminMembersTab({ user }: AdminMembersTabProps) {
                                     </td>
                                     <td className="p-3">
                                         <GlassButton
-                                            variant="outline"
+                                            className='glass-button'
                                             size="sm"
                                             onClick={() => openEditMember(member)}
                                         >
@@ -439,7 +469,6 @@ export function AdminMembersTab({ user }: AdminMembersTabProps) {
                             </GlassButton>
                             <GlassButton
                                 type="button"
-                                variant="outline"
                                 className="flex-1"
                                 onClick={() => {
                                     setShowEditMember(false);
