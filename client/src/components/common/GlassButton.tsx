@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 
 interface GlassButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     children: ReactNode;
-    variant?: 'default' | 'primary' | 'danger' | 'success';
+    variant?: 'default' | 'primary' | 'danger' | 'success' | 'outline' | 'warning';
     size?: 'sm' | 'md' | 'lg';
     isLoading?: boolean;
     icon?: ReactNode;
@@ -28,8 +28,10 @@ export function GlassButton({
     const variantStyles = {
         default: 'glass-button',
         primary: 'glass-button-primary',
+        warning: 'bg-yellow-500/90 hover:bg-red-600 text-white border border-yellow-400/30',
         danger: 'bg-red-500/90 hover:bg-red-600 text-white border border-red-400/30',
-        success: 'bg-green-500/90 hover:bg-green-600 text-white border border-green-400/30'
+        success: 'bg-green-500/90 hover:bg-green-600 text-white border border-green-400/30',
+        outline: 'border-2 border-slate-400/40 dark:border-slate-600/40 text- slate - 700 dark: text-slate - 200 hover: bg - slate - 100 / 20 dark: hover: bg - slate - 800 / 30 transition - all duration - 200 rounded - xl backdrop - blur - md'
     };
 
     const sizeStyles = {

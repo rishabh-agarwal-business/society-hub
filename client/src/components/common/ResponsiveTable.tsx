@@ -6,10 +6,16 @@ import { GlassInput } from './GlassInput';
 export interface Column<T> {
     key: string;
     label: string;
+
     sortable?: boolean;
-    render?: (item: T) => ReactNode;
-    mobileLabel?: string; // Label for mobile view
     className?: string;
+    mobileLabel?: string;
+
+    // Support both render(item) and render(value, row)
+    render?: ((item: T) => ReactNode) |
+    ((value: any, row: T) => ReactNode);
+
+    accessor?: keyof T; // optional for new style
 }
 
 interface ResponsiveTableProps<T> {
@@ -24,6 +30,17 @@ interface ResponsiveTableProps<T> {
 }
 
 type SortDirection = 'asc' | 'desc' | null;
+
+function renderCell<T extends Record<string, any>>(column: Column<T>, item: T) {
+    if (!column.render) return item[column.key];
+
+    if (column.accessor) {
+        const value = item[column.accessor];
+        return (column.render as (value: any, row: T) => React.ReactNode)(value, item);
+    }
+
+    return (column.render as (item: T) => React.ReactNode)(item);
+}
 
 /**
  * Reusable responsive table component
@@ -46,9 +63,8 @@ export function ResponsiveTable<T extends Record<string, any>>({
 
     const handleSort = (columnKey: string) => {
         if (sortColumn === columnKey) {
-            if (sortDirection === 'asc') {
-                setSortDirection('desc');
-            } else if (sortDirection === 'desc') {
+            if (sortDirection === 'asc') setSortDirection('desc');
+            else if (sortDirection === 'desc') {
                 setSortDirection(null);
                 setSortColumn(null);
             }
@@ -76,7 +92,6 @@ export function ResponsiveTable<T extends Record<string, any>>({
 
     return (
         <div className="w-full space-y-4">
-            {/* Search */}
             {searchable && (
                 <GlassInput
                     type="text"
@@ -87,7 +102,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
                 />
             )}
 
-            {/* Desktop Table View */}
+            {/* Desktop */}
             <div className="hidden md:block overflow-x-auto">
                 <GlassCard className="overflow-hidden">
                     <table className="w-full">
@@ -105,18 +120,14 @@ export function ResponsiveTable<T extends Record<string, any>>({
                                             >
                                                 {column.label}
                                                 {sortColumn === column.key ? (
-                                                    sortDirection === 'asc' ? (
-                                                        <ChevronUp className="w-4 h-4" />
-                                                    ) : (
-                                                        <ChevronDown className="w-4 h-4" />
-                                                    )
+                                                    sortDirection === 'asc'
+                                                        ? <ChevronUp className="w-4 h-4" />
+                                                        : <ChevronDown className="w-4 h-4" />
                                                 ) : (
                                                     <ArrowUpDown className="w-4 h-4 opacity-30" />
                                                 )}
                                             </button>
-                                        ) : (
-                                            column.label
-                                        )}
+                                        ) : column.label}
                                     </th>
                                 ))}
                             </tr>
@@ -135,14 +146,14 @@ export function ResponsiveTable<T extends Record<string, any>>({
                                 sortedData.map((item) => (
                                     <tr
                                         key={keyExtractor(item)}
-                                        className="border-b border-slate-200 dark:border-slate-700 last:border-0 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
+                                        className="border-b last:border-0 border-slate-200 dark:border-slate-700 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
                                     >
                                         {columns.map((column) => (
                                             <td
                                                 key={column.key}
                                                 className={`px-4 py-3 text-slate-900 dark:text-white ${column.className || ''}`}
                                             >
-                                                {column.render ? column.render(item) : item[column.key]}
+                                                {renderCell(column, item)}
                                             </td>
                                         ))}
                                     </tr>
@@ -153,7 +164,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
                 </GlassCard>
             </div>
 
-            {/* Mobile Card View */}
+            {/* Mobile */}
             <div className="md:hidden space-y-3">
                 {sortedData.length === 0 ? (
                     <GlassCard className="p-6 text-center text-slate-500 dark:text-slate-400">
@@ -172,7 +183,7 @@ export function ResponsiveTable<T extends Record<string, any>>({
                                                 {column.mobileLabel || column.label}:
                                             </span>
                                             <span className="text-sm text-slate-900 dark:text-white text-right">
-                                                {column.render ? column.render(item) : item[column.key]}
+                                                {renderCell(column, item)}
                                             </span>
                                         </div>
                                     ))}
@@ -185,3 +196,4 @@ export function ResponsiveTable<T extends Record<string, any>>({
         </div>
     );
 }
+

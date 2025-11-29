@@ -43,6 +43,7 @@ export interface User {
     role: 'society_admin' | 'member';
     societyId?: string;
     houseNumber?: string;
+    phone: string;
 }
 
 export interface Society {

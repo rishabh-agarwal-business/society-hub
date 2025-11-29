@@ -1,21 +1,88 @@
-import React from 'react'
-import ThemeProvider from './contexts/ThemeContext'
-import LandingPage from './components/landing/LandingPage'
+import { useState, useEffect } from 'react';
+import { LandingPage } from './components/LandingPage';
+import { authService } from './components/services/authService';
+import ThemeProvider from './contexts/ThemeContext';
+import { DashboardView } from './components/dashboard/Dashboard';
+import { EventPopup } from './components/EventPopup';
+import { AdminDashboard } from './components/adminDashboard/AdminDashboard';
 
-const AppContent = () => {
+function AppContent() {
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'admin'>('landing');
+  const [showEventPopup, setShowEventPopup] = useState(false);
+
+  // User data from authService
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+      if (currentUser.role === 'society_admin') {
+        setCurrentView('admin');
+      } else {
+        setCurrentView('dashboard');
+      }
+    }
+  }, []);
+
+  // Show event popup when user logs in
+  useEffect(() => {
+    if (currentView === 'dashboard' && user && user.role === 'member') {
+      const timer = setTimeout(() => {
+        setShowEventPopup(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentView, user]);
+
+  const handleLogin = (userData: any) => {
+    setUser(userData);
+    // Check if user is society admin
+    if (userData.role === 'society_admin') {
+      setCurrentView('admin');
+    } else {
+      setCurrentView('dashboard');
+    }
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setUser(null);
+    setCurrentView('landing');
+  };
+
   return (
     <div className="min-h-screen transition-colors duration-300 bg-linear-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-blue-950 dark:to-purple-950">
-      <LandingPage />
+      {currentView === 'landing' ? (
+        <LandingPage
+          onLogin={handleLogin}
+        />
+      ) : currentView === 'admin' ? (
+        <AdminDashboard
+          user={user}
+          onLogout={handleLogout}
+        />
+      ) : (
+        <DashboardView
+          user={user}
+          onLogout={handleLogout}
+        />
+      )}
+
+      {showEventPopup && (
+        <EventPopup
+          onClose={() => setShowEventPopup(false)}
+        />
+      )}
     </div>
-  )
+  );
 }
 
-const App = () => {
+export default function App() {
   return (
     <ThemeProvider>
       <AppContent />
     </ThemeProvider>
-  )
+  );
 }
-
-export default App

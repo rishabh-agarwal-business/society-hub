@@ -1,7 +1,20 @@
 import { Building2, Moon, Sun, Menu, X } from 'lucide-react';
-import { Button } from '../ui/button';
 
-const Header = ({
+interface HeaderProps {
+    title?: string;
+    isDarkMode: boolean;
+    onToggleDarkMode: () => void;
+    showMenuButton?: boolean;
+    onMenuToggle?: () => void;
+    isMenuOpen?: boolean;
+    actions?: React.ReactNode;
+}
+
+/**
+ * Reusable header component
+ * Responsive with mobile menu support
+ */
+export function Header({
     title = 'SocietyHub',
     isDarkMode,
     onToggleDarkMode,
@@ -9,11 +22,10 @@ const Header = ({
     onMenuToggle,
     isMenuOpen = false,
     actions
-}: HeaderProps) => {
+}: HeaderProps) {
     return (
         <nav className="relative z-10 px-4 md:px-6 py-4 md:py-6">
             <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-                {/* Logo and Title */}
                 <div className="flex items-center gap-3">
                     {showMenuButton && onMenuToggle && (
                         <button
@@ -36,21 +48,11 @@ const Header = ({
                     </span>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-2 md:gap-3">
-                    <div className="hidden md:flex items-center gap-6 mr-4">
-                        {
-                            actions?.map((action: HeaderLink) => {
-                                const { title, style, url } = action;
-                                return (
-                                    <a key={title} href={url} className={style}>{title}</a>
-                                )
-                            })
-                        }
-                    </div>
-                    <Button
+                    {actions}
+                    <button
                         onClick={onToggleDarkMode}
-                        className="glass-button px-4 md:px-6 text-sm md:text-base cursor-pointer"
+                        className="glass-morphism p-2 md:p-3 rounded-xl hover:scale-105 transition-transform"
                         aria-label="Toggle dark mode"
                     >
                         {isDarkMode ? (
@@ -58,19 +60,9 @@ const Header = ({
                         ) : (
                             <Moon className="w-4 h-4 md:w-5 md:h-5 text-slate-700" />
                         )}
-                    </Button>
-                    <Button
-                        // onClick={() => setShowAuth(!showAuth)}
-                        onClick={() => console.log('logs')}
-                        className="glass-button px-4 md:px-6 cursor-pointer"
-                    >
-                        {/* {showAuth ? 'Back' : 'Get Started'} */}
-                        <span className='text-slate-900 dark:text-white tracking-tight text-sm md:text-base truncate'>Get Started</span>
-                    </Button>
+                    </button>
                 </div>
             </div>
         </nav>
-    )
+    );
 }
-
-export default Header

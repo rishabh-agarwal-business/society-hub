@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react';
+import { Mail, Lock, AlertCircle, Building2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { AlertCircle, Building2, Lock, Mail } from 'lucide-react';
 import { authService } from './services/authService';
-import { SigninProps } from '../types';
 
-const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
+interface LoginFormProps {
+    onLogin: (user: any) => void;
+    onSwitchToSignup: () => void;
+    isDarkMode?: boolean;
+}
+
+export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
     const { isDarkMode } = useTheme();
     const [step, setStep] = useState(1); // 1: Select Society, 2: Enter Credentials
     const [societies, setSocieties] = useState<any[]>([]);
@@ -60,12 +65,16 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
 
     return (
         <div className="w-full max-w-md">
-            <div className={`relative overflow-hidden rounded-3xl p-8
-                    ${isDarkMode
+            {/* Glassmorphic Card */}
+            <div className={`
+        relative overflow-hidden rounded-3xl p-8
+        ${isDarkMode
                     ? 'bg-white/10 backdrop-blur-xl border border-white/20'
                     : 'bg-white/60 backdrop-blur-xl border border-white/40'
-                } shadow-2xl`}>
-
+                }
+        shadow-2xl
+      `}>
+                {/* Title */}
                 <div className="text-center mb-8">
                     <h2 className={`text-2xl mb-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                         Welcome Back
@@ -75,17 +84,21 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                     </p>
                 </div>
 
+                {/* Error Alert */}
                 {error && (
-                    <div className={`flex items-center gap-2 p-4 rounded-xl mb-6
-                            ${isDarkMode
+                    <div className={`
+            flex items-center gap-2 p-4 rounded-xl mb-6
+            ${isDarkMode
                             ? 'bg-red-500/20 border border-red-500/30 text-red-200'
                             : 'bg-red-50 border border-red-200 text-red-700'
-                        }`}>
+                        }
+          `}>
                         <AlertCircle className="w-5 h-5 shrink-0" />
                         <p>{error}</p>
                     </div>
                 )}
 
+                {/* Step 1: Society Selection */}
                 {step === 1 && (
                     <div className="space-y-6">
                         <div>
@@ -97,13 +110,15 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                                 <select
                                     value={selectedSociety}
                                     onChange={(e) => setSelectedSociety(e.target.value)}
-                                    className={`w-full pl-12 pr-4 py-3 rounded-xl
-                                            ${isDarkMode
+                                    className={`
+                    w-full pl-12 pr-4 py-3 rounded-xl
+                    ${isDarkMode
                                             ? 'bg-white/10 border-white/20 text-white'
                                             : 'bg-white/50 border-slate-200 text-slate-900'
                                         }
-                                        border focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                                        transition-all appearance-none cursor-pointer`}
+                    border focus:outline-none focus:ring-2 focus:ring-blue-500/50
+                    transition-all appearance-none cursor-pointer
+                  `}
                                 >
                                     <option value="">Choose a society</option>
                                     {societies.map((society) => (
@@ -117,24 +132,31 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
 
                         <button
                             onClick={handleSocietySelect}
-                            className={`w-full py-3 rounded-xl transition-all
-                                    ${isDarkMode
+                            className={`
+                w-full py-3 rounded-xl transition-all
+                ${isDarkMode
                                     ? 'bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
                                     : 'bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
-                                }text-white shadow-lg hover:shadow-xl`}
+                                }
+                text-white shadow-lg hover:shadow-xl
+              `}
                         >
                             Continue
                         </button>
                     </div>
                 )}
 
+                {/* Step 2: Login Form */}
                 {step === 2 && (
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className={`p-4 rounded-xl flex items-center justify-between
-                                ${isDarkMode
+                        {/* Selected Society Display */}
+                        <div className={`
+              p-4 rounded-xl flex items-center justify-between
+              ${isDarkMode
                                 ? 'bg-blue-500/20 border border-blue-500/30'
                                 : 'bg-blue-50 border border-blue-200'
-                            }`}>
+                            }
+            `}>
                             <div className="flex items-center gap-2">
                                 <Building2 className={`w-5 h-5 ${isDarkMode ? 'text-blue-200' : 'text-blue-600'}`} />
                                 <span className={isDarkMode ? 'text-blue-200' : 'text-blue-800'}>
@@ -150,6 +172,7 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                             </button>
                         </div>
 
+                        {/* Demo Credentials */}
                         <div className={`
               p-4 rounded-xl
               ${isDarkMode
@@ -169,24 +192,28 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                     ${isDarkMode
                                             ? 'bg-green-500/30 hover:bg-green-500/40 text-green-200'
                                             : 'bg-green-600 hover:bg-green-700 text-white'
-                                        }`}
+                                        }
+                  `}
                                 >
                                     Admin: admin1@greenvalley.com / admin@123
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => fillDemoCredentials('member')}
-                                    className={`text-sm px-4 py-2 rounded-lg transition-all w-full text-left
-                                            ${isDarkMode
+                                    className={`
+                    text-sm px-4 py-2 rounded-lg transition-all w-full text-left
+                    ${isDarkMode
                                             ? 'bg-green-500/30 hover:bg-green-500/40 text-green-200'
                                             : 'bg-green-600 hover:bg-green-700 text-white'
-                                        }`}
+                                        }
+                  `}
                                 >
                                     Member: amit@example.com / member@123
                                 </button>
                             </div>
                         </div>
 
+                        {/* Email Field */}
                         <div>
                             <label className={`block mb-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                                 Email Address
@@ -199,17 +226,20 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
                                     placeholder="Enter your email"
-                                    className={`w-full pl-12 pr-4 py-3 rounded-xl
-                                            ${isDarkMode
+                                    className={`
+                    w-full pl-12 pr-4 py-3 rounded-xl
+                    ${isDarkMode
                                             ? 'bg-white/10 border-white/20 text-white placeholder:text-slate-400'
                                             : 'bg-white/50 border-slate-200 text-slate-900 placeholder:text-slate-500'
                                         }
-                                        border focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                                        transition-all `}
+                    border focus:outline-none focus:ring-2 focus:ring-blue-500/50
+                    transition-all
+                  `}
                                 />
                             </div>
                         </div>
 
+                        {/* Password Field */}
                         <div>
                             <label className={`block mb-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                                 Password
@@ -222,33 +252,39 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                     placeholder="Enter your password"
-                                    className={`w-full pl-12 pr-4 py-3 rounded-xl
-                                            ${isDarkMode
+                                    className={`
+                    w-full pl-12 pr-4 py-3 rounded-xl
+                    ${isDarkMode
                                             ? 'bg-white/10 border-white/20 text-white placeholder:text-slate-400'
                                             : 'bg-white/50 border-slate-200 text-slate-900 placeholder:text-slate-500'
                                         }
-                                        border focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                                        transition-all`}
+                    border focus:outline-none focus:ring-2 focus:ring-blue-500/50
+                    transition-all
+                  `}
                                 />
                             </div>
                         </div>
 
+                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className={`w-full py-3 rounded-xl transition-all
-                                    ${isDarkMode
+                            className={`
+                w-full py-3 rounded-xl transition-all
+                ${isDarkMode
                                     ? 'bg-linear-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
                                     : 'bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
                                 }
-                                text-white shadow-lg hover:shadow-xl
-                                disabled:opacity-50 disabled:cursor-not-allowed`}
+                text-white shadow-lg hover:shadow-xl
+                disabled:opacity-50 disabled:cursor-not-allowed
+              `}
                         >
                             {isLoading ? 'Signing in...' : 'Sign In'}
                         </button>
                     </form>
                 )}
 
+                {/* Switch to Signup */}
                 <div className="mt-6 text-center">
                     <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
                         Don't have an account?{' '}
@@ -262,7 +298,5 @@ const SigninForm = ({ onLogin, onSwitchToSignup }: SigninProps) => {
                 </div>
             </div>
         </div>
-    )
+    );
 }
-
-export default SigninForm
