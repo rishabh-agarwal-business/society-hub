@@ -12,7 +12,7 @@ const Hero = () => {
 
             <h1 className="text-slate-900 dark:text-white text-6xl md:text-7xl tracking-tight">
                 Manage Your Society
-                <span className="block mt-2 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
+                <span className="block mt-2 bg-linear-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
                     Effortlessly
                 </span>
             </h1>

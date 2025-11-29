@@ -1,11 +1,10 @@
 import { Building2 } from 'lucide-react'
-import React from 'react'
 
 const Footer = () => {
     return (
         <footer className="relative z-10 border-t border-slate-200/50 dark:border-slate-800/50 mt-20">
             <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="grid md:grid-cols-4 gap-8">
+                <div className="grid sm:grid-cols-4 gap-8">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <div className="glass-morphism p-2 rounded-2xl">

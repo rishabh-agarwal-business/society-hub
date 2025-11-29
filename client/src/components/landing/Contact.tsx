@@ -26,7 +26,7 @@ const Contact = () => {
 
                         <div className="space-y-6">
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center shrink-0">
                                     <Mail className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
@@ -36,7 +36,7 @@ const Contact = () => {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center shrink-0">
                                     <Phone className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
@@ -46,7 +46,7 @@ const Contact = () => {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                                <div className="w-12 h-12 rounded-xl bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center shrink-0">
                                     <MapPin className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
@@ -133,7 +133,7 @@ const Contact = () => {
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     )
 }
 
