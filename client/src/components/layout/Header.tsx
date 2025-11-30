@@ -1,4 +1,5 @@
 import { Building2, Moon, Sun, Menu, X } from 'lucide-react';
+import { GlassButton } from '../common/GlassButton';
 
 interface HeaderProps {
     title?: string;
@@ -28,9 +29,9 @@ export function Header({
             <div className="max-w-8xl mx-auto flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                     {showMenuButton && onMenuToggle && (
-                        <button
+                        <GlassButton
                             onClick={onMenuToggle}
-                            className="lg:hidden p-2 glass-morphism rounded-xl hover:scale-105 transition-transform"
+                            className="lg:hidden p-2 glass-morphism hover:scale-105 transition-transform"
                             aria-label="Toggle menu"
                         >
                             {isMenuOpen ? (
@@ -38,7 +39,7 @@ export function Header({
                             ) : (
                                 <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
                             )}
-                        </button>
+                        </GlassButton>
                     )}
                     <div className="glass-morphism p-2 rounded-2xl">
                         <Building2 className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400" />
@@ -50,9 +51,9 @@ export function Header({
 
                 <div className="flex items-center gap-2 md:gap-3">
                     {actions}
-                    <button
+                    <GlassButton
                         onClick={onToggleDarkMode}
-                        className="glass-morphism p-2 md:p-3 rounded-xl hover:scale-105 transition-transform"
+                        className="glass-button p-2 md:p-3 hover:scale-105 transition-transform"
                         aria-label="Toggle dark mode"
                     >
                         {isDarkMode ? (
@@ -60,7 +61,7 @@ export function Header({
                         ) : (
                             <Moon className="w-4 h-4 md:w-5 md:h-5 text-slate-700" />
                         )}
-                    </button>
+                    </GlassButton>
                 </div>
             </div>
         </nav>

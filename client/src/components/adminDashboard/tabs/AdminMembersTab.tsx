@@ -232,7 +232,7 @@ export function AdminMembersTab({ user }: AdminMembersTabProps) {
                         label="Account Status"
                         value={statusFilter}
                         icon={CircleUser}
-                        onValueChange={(e: any) => setStatusFilter(e.target.value)}
+                        onValueChange={(value) => setStatusFilter(value)}
                         options={[
                             { value: 'all', label: 'All' },
                             { value: 'active', label: 'Active' },

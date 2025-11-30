@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     Home, CreditCard, Bell, BarChart3, Settings,
-    Calendar, CheckCircle2, XCircle, Clock
+    Calendar, CheckCircle2, XCircle, Clock, Vote
 } from 'lucide-react';
 import { PageContainer } from '../layout/PageContainer';
 import { Header } from '../layout/Header';
@@ -13,13 +13,14 @@ import { RemindersTab } from './tabs/RemindersTab';
 import { AnalyticsTab } from './tabs/AnalyticsTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { User } from '../../types';
+import { ElectionsTab } from './tabs/ElectionsTab';
 
 interface DashboardViewProps {
     user: User;
     onLogout: () => void;
 }
 
-type TabType = 'overview' | 'payments' | 'reminders' | 'analytics' | 'settings';
+type TabType = 'overview' | 'payments' | 'reminders' | 'analytics' | 'elections' | 'settings';
 
 /**
  * Refactored Dashboard Component
@@ -36,6 +37,7 @@ export function DashboardView({ user, onLogout }: DashboardViewProps) {
         { id: 'payments', label: 'Payments', icon: CreditCard },
         { id: 'reminders', label: 'Reminders', icon: Bell, badge: 2 },
         { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+        { id: 'elections', label: 'Elections', icon: Vote },
         { id: 'settings', label: 'Settings', icon: Settings }
     ];
 
@@ -49,6 +51,8 @@ export function DashboardView({ user, onLogout }: DashboardViewProps) {
                 return <RemindersTab user={user} />;
             case 'analytics':
                 return <AnalyticsTab user={user} />;
+            case 'elections':
+                return <ElectionsTab user={user} />;
             case 'settings':
                 return <SettingsTab user={user} />;
             default:

@@ -103,7 +103,7 @@ export function AnalyticsTab({ user }: AnalyticsTabProps) {
                 <GlassSelect
                     label="Year"
                     value={selectedYear}
-                    onValueChange={setSelectedYear}
+                    onValueChange={(value) => setSelectedYear(value)}
                     icon={Calendar}
                     options={[
                         { value: "2023", label: "2023" },
@@ -116,7 +116,7 @@ export function AnalyticsTab({ user }: AnalyticsTabProps) {
                 <GlassSelect
                     label="Compare With"
                     value={comparisonYear}
-                    onValueChange={setComparisonYear}
+                    onValueChange={(value) => setComparisonYear(value)}
                     icon={Calendar}
                     options={[
                         { value: "2023", label: "2023" },

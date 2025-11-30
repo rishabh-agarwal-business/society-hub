@@ -67,7 +67,7 @@ export function Sidebar({
                                 onItemClick(item.id);
                                 onClose?.();
                             }}
-                            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                            className={`w-full cursor-pointer flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all ${isActive
                                 ? 'glass-button-primary'
                                 : 'hover:bg-slate-200/50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'
                                 }`}

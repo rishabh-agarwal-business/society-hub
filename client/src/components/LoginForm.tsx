@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Mail, Lock, AlertCircle, Building2 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { authService } from './services/authService';
+import { GlassSelect } from './common/GlassSelect';
 
 interface LoginFormProps {
     onLogin: (user: any) => void;
@@ -101,34 +102,18 @@ export function LoginForm({ onLogin, onSwitchToSignup }: LoginFormProps) {
                 {/* Step 1: Society Selection */}
                 {step === 1 && (
                     <div className="space-y-6">
-                        <div>
-                            <label className={`block mb-2 ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
-                                Select Your Society
-                            </label>
-                            <div className="relative">
-                                <Building2 className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
-                                <select
-                                    value={selectedSociety}
-                                    onChange={(e) => setSelectedSociety(e.target.value)}
-                                    className={`
-                    w-full pl-12 pr-4 py-3 rounded-xl
-                    ${isDarkMode
-                                            ? 'bg-white/10 border-white/20 text-white'
-                                            : 'bg-white/50 border-slate-200 text-slate-900'
-                                        }
-                    border focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                    transition-all appearance-none cursor-pointer
-                  `}
-                                >
-                                    <option value="">Choose a society</option>
-                                    {societies.map((society) => (
-                                        <option key={society.id} value={society.id} className="bg-slate-900">
-                                            {society.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
+                        <GlassSelect
+                            value={selectedSociety}
+                            icon={Building2}
+                            label='Choose your society'
+                            onValueChange={(value) => {
+                                setSelectedSociety(value)
+                            }}
+                            options={societies.map(society => ({
+                                value: society.id,
+                                label: society.name
+                            }))}
+                        />
 
                         <button
                             onClick={handleSocietySelect}

@@ -266,7 +266,7 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                         label="Year"
                         value={selectedYear.toString()}
                         icon={Calendar}
-                        onValueChange={(e: any) => setSelectedYear(parseInt(e.target.value))}
+                        onValueChange={(value) => setSelectedYear(parseInt(value))}
                         options={years.map(year => ({ value: year, label: year.toString() }))}
                     />
 
@@ -274,7 +274,7 @@ export function AdminPaymentsTab({ user }: AdminPaymentsTabProps) {
                         label="Payment Status"
                         value={filterStatus}
                         icon={IndianRupee}
-                        onValueChange={(e: any) => setFilterStatus(e.target.value)}
+                        onValueChange={(value) => setFilterStatus(value)}
                         options={[
                             { value: 'all', label: 'All Members' },
                             { value: 'paid', label: 'Fully Paid (12/12)' },

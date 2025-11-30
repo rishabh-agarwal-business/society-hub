@@ -108,7 +108,7 @@ export function AdminAnalyticsTab({ user }: AdminAnalyticsTabProps) {
                     label="Year"
                     value={selectedYear.toString()}
                     icon={Calendar}
-                    onValueChange={(e: any) => setSelectedYear(parseInt(e.target.value))}
+                    onValueChange={(value) => setSelectedYear(parseInt(value))}
                     options={years.map(year => ({ value: year, label: year.toString() }))}
                 />
             </div>

@@ -467,10 +467,10 @@ export function SettingsTab({ user }: SettingsTabProps) {
                                     <GlassSelect
                                         label='Payment Reminder (days before due date)'
                                         value={paymentPrefs.reminderDays}
-                                        onValueChange={(e: any) =>
+                                        onValueChange={(value) =>
                                             setPaymentPrefs({
                                                 ...paymentPrefs,
-                                                reminderDays: parseInt(e.target.value),
+                                                reminderDays: parseInt(value),
                                             })
                                         }
                                         icon={Calendar}

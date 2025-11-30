@@ -187,7 +187,7 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
                         label="Event Type"
                         value={filterType}
                         icon={Tickets}
-                        onValueChange={(e: any) => setFilterType(e.target.value)}
+                        onValueChange={(value) => setFilterType(value)}
                         options={[
                             { value: 'all', label: 'All Types' },
                             { value: 'announcement', label: 'Announcement' },
@@ -201,7 +201,7 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
                         label="Date Range"
                         icon={Calendar}
                         value={filterDateRange}
-                        onValueChange={(e: any) => setFilterDateRange(e.target.value as any)}
+                        onValueChange={(value) => setFilterDateRange(value as any)}
                         options={[
                             { value: 'all', label: 'All Events' },
                             { value: 'upcoming', label: 'Upcoming Only' },
@@ -391,7 +391,7 @@ export function AdminEventsTab({ user }: AdminEventsTabProps) {
                         <GlassSelect
                             label="Event Type"
                             value={eventType}
-                            onValueChange={(e: any) => setEventType(e.target.value as SocietyEvent['type'])}
+                            onValueChange={(value) => setEventType(value as SocietyEvent['type'])}
                             options={[
                                 { value: 'announcement', label: 'Announcement' },
                                 { value: 'meeting', label: 'Meeting' },

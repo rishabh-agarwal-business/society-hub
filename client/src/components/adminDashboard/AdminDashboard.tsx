@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
     Home, CreditCard, Bell, BarChart3, Settings,
-    Users, Calendar
+    Users, Calendar, Vote
 } from 'lucide-react';
 import { PageContainer } from '../layout/PageContainer';
 import { Header } from '../layout/Header';
@@ -14,13 +14,14 @@ import { AdminEventsTab } from './tabs/AdminEventsTab';
 import { AdminAnalyticsTab } from './tabs/AdminAnalyticsTab';
 import { AdminSettingsTab } from './tabs/AdminSettingsTab';
 import { User } from '../../types';
+import { AdminElectionsTab } from './tabs/AdminElectionsTab';
 
 interface AdminDashboardProps {
     user: User;
     onLogout: () => void;
 }
 
-type TabType = 'overview' | 'members' | 'payments' | 'events' | 'analytics' | 'settings';
+type TabType = 'overview' | 'members' | 'payments' | 'events' | 'elections' | 'analytics' | 'settings';
 
 /**
  * Admin Dashboard Component
@@ -37,6 +38,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         { id: 'members', label: 'Members', icon: Users },
         { id: 'payments', label: 'Payments', icon: CreditCard },
         { id: 'events', label: 'Events', icon: Calendar },
+        { id: 'elections', label: 'Elections', icon: Vote },
         { id: 'analytics', label: 'Analytics', icon: BarChart3 },
         { id: 'settings', label: 'Settings', icon: Settings }
     ];
@@ -53,6 +55,8 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                 return <AdminEventsTab user={user} />;
             case 'analytics':
                 return <AdminAnalyticsTab user={user} />;
+            case 'elections':
+                return <AdminElectionsTab user={user} />;
             case 'settings':
                 return <AdminSettingsTab user={user} />;
             default:

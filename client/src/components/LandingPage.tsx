@@ -11,6 +11,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { LoginForm } from './LoginForm';
 import { SignupForm } from './SignupForm';
+import { GlassButton } from './common/GlassButton';
 
 interface LandingPageProps {
     onLogin: (userData: any) => void;
@@ -55,22 +56,22 @@ export function LandingPage({ onLogin }: LandingPageProps) {
                                 <a href="#contact" className="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Contact</a>
                             </div>
                         )}
-                        <button
+                        <GlassButton
                             onClick={toggleDarkMode}
-                            className="glass-morphism p-2 md:p-3 rounded-xl hover:scale-105 transition-transform"
+                            className="glass-button p-2 md:p-3 hover:scale-105 transition-transform"
                         >
                             {isDarkMode ? (
                                 <Sun className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
                             ) : (
                                 <Moon className="w-4 h-4 md:w-5 md:h-5 text-slate-700" />
                             )}
-                        </button>
-                        <Button
+                        </GlassButton>
+                        <GlassButton
                             onClick={() => setShowAuth(!showAuth)}
                             className="glass-button px-4 md:px-6 text-sm md:text-base"
                         >
                             {showAuth ? 'Back' : 'Get Started'}
-                        </Button>
+                        </GlassButton>
                     </div>
                 </div>
             </nav>

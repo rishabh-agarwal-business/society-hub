@@ -203,7 +203,7 @@ export function PaymentsTab({ user }: PaymentsTabProps) {
                     <GlassSelect
                         label="Year"
                         value={selectedYear}
-                        onValueChange={setSelectedYear}
+                        onValueChange={(value) => setSelectedYear(value)}
                         icon={Calendar}
                         options={[
                             { value: "all", label: "All Years" },
@@ -217,7 +217,7 @@ export function PaymentsTab({ user }: PaymentsTabProps) {
                     <GlassSelect
                         label='Status'
                         value={selectedStatus}
-                        onValueChange={setSelectedStatus}
+                        onValueChange={(value) => setSelectedStatus(value)}
                         icon={Filter}
                         options={[
                             { value: 'all', label: 'All Status' },

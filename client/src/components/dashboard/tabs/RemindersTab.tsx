@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import {
     Bell, Mail, MessageSquare, Phone, Check,
-    Calendar, Clock, Settings
+    Calendar, Clock, Settings, BellRing
 } from 'lucide-react';
 import { GlassCard } from '../../common/GlassCard';
 import { GlassButton } from '../../common/GlassButton';
 import { StatusBadge } from '../../common/StatusBadge';
 import { Modal } from '../../common/Modal';
 import { User } from '../../../types';
+import { GlassSelect } from '../../common/GlassSelect';
 
 interface RemindersTabProps {
     user: User;
@@ -310,24 +311,22 @@ export function RemindersTab({ user }: RemindersTabProps) {
                             <h3 className="text-sm text-slate-900 dark:text-white mb-3">
                                 Reminder Timing
                             </h3>
-                            <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800">
-                                <label className="text-sm text-slate-600 dark:text-slate-400 mb-2 block">
-                                    Send reminders (days before due date)
-                                </label>
-                                <select
-                                    value={preferences.daysBefore}
-                                    onChange={(e) =>
-                                        setPreferences({ ...preferences, daysBefore: parseInt(e.target.value) })
-                                    }
-                                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600"
-                                >
-                                    <option value={1}>1 day before</option>
-                                    <option value={3}>3 days before</option>
-                                    <option value={5}>5 days before</option>
-                                    <option value={7}>7 days before</option>
-                                    <option value={10}>10 days before</option>
-                                </select>
-                            </div>
+                            <GlassSelect
+                                icon={BellRing}
+                                label='Send reminders (days before due date)'
+                                placeholder='Select reminders time'
+                                onValueChange={
+                                    (value) =>
+                                        setPreferences({ ...preferences, daysBefore: parseInt(value) })
+                                }
+                                options={[
+                                    { value: 1, label: '1 day before' },
+                                    { value: 3, label: '3 day before' },
+                                    { value: 5, label: '5 day before' },
+                                    { value: 7, label: '7 day before' },
+                                    { value: 10, label: '10 day before' },
+                                ]}
+                            />
                         </div>
 
                         <GlassButton variant="primary" className="w-full">

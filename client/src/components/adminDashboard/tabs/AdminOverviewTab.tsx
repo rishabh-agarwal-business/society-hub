@@ -154,7 +154,7 @@ export function AdminOverviewTab({ user }: AdminOverviewTabProps) {
                         label="Year"
                         value={selectedYear.toString()}
                         icon={Calendar}
-                        onValueChange={(e: any) => setSelectedYear(parseInt(e.target.value))}
+                        onValueChange={(value) => setSelectedYear(parseInt(value))}
                         options={years.map(year => ({ value: year, label: year.toString() }))}
                     />
 
@@ -162,7 +162,7 @@ export function AdminOverviewTab({ user }: AdminOverviewTabProps) {
                         label="Month"
                         value={selectedMonth}
                         icon={Filter}
-                        onValueChange={(e: any) => setSelectedMonth(e.target.value)}
+                        onValueChange={(value) => setSelectedMonth(value)}
                         options={[
                             { value: 'all', label: 'All Months' },
                             ...MONTHS.map(month => ({ value: month, label: month }))
